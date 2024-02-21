@@ -6,9 +6,14 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 const session = require("express-session");
 const mongoDbsession = require("connect-mongodb-session")(session);
+const jwt = require("jsonwebtoken");
 
 //file-import
-const { userDataValidation } = require("./utils/authUtil");
+const {
+  userDataValidation,
+  genrateJWTToken,
+  sendVerificationEmail,
+} = require("./utils/authUtil");
 const userModel = require("./models/userModel");
 const { isAuth } = require("./middlewares/authMiddleware");
 const todoModel = require("./models/todoModel");
@@ -103,11 +108,34 @@ app.post("/register", async (req, res) => {
 
   try {
     const userDb = await userObj.save();
-    // return res.send({
-    //   status: 201,
-    //   message: "Registeration successfull",
-    //   data: userDb,
-    // });
+
+    //genrate a token
+    const verifiedToken = genrateJWTToken(email);
+
+    //send a mail to user
+    sendVerificationEmail(email, verifiedToken);
+
+    return res.redirect("/login");
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: 500,
+      message: "Database error",
+      error: error,
+    });
+  }
+});
+
+app.get("/verifytoken/:token", async (req, res) => {
+  const token = req.params.token;
+  const userEmail = jwt.verify(token, process.env.SECRET_KEY);
+  console.log(userEmail);
+
+  try {
+    await userModel.findOneAndUpdate(
+      { email: userEmail },
+      { isEmailAuthenticated: true }
+    );
     return res.redirect("/login");
   } catch (error) {
     return res.send({
@@ -145,6 +173,14 @@ app.post("/login", async (req, res) => {
       return res.send({
         status: 400,
         message: "User not found, please register",
+      });
+    }
+
+    //if email is authenticated
+    if (!userDb.isEmailAuthenticated) {
+      return res.send({
+        status: 400,
+        message: "Please verify your email, before login",
       });
     }
 
