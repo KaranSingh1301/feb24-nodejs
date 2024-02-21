@@ -31,10 +31,7 @@ delete : Done
 Read Component : Done
 
 Pagination API : Done
-Rate limiting
-Deployment (heroku, railway.com, render.com, vercel)
+Rate limiting : Done
+Deployment (heroku, railway.com, render.com, vercel) : Done
 
-JWT Email Authentication
-
-
-schema, queries, operators, aggregate, populate.
+JWT Email Authentication : Done
