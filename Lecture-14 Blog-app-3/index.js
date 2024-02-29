@@ -44,3 +44,5 @@ app.use("/blog", isAuth, BlogRouter);
 app.listen(PORT, () => {
   console.log(clc.yellowBright(`Server is running on PORT:${PORT}`));
 });
+
+//https://docs.google.com/document/d/1PIuTHTJwMezvKWnNLZNntnkjMj35FuKbOfGNaRVcRD0/edit?usp=sharing
